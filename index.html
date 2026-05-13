@@ -5,8 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Tech Rescue: First Aid Adventure</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/three@0.160.0/examples/js/loaders/GLTFLoader.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/build/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.155.0/examples/js/loaders/GLTFLoader.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Nunito:wght@400;600;700&display=swap" rel="stylesheet">
@@ -37,6 +37,15 @@
         body { font-family: 'Nunito', sans-serif; }
         .font-heading { font-family: 'Fredoka', sans-serif; }
         
+        /* Three.js Canvas */
+        #threejs-canvas {
+            touch-action: none;
+            cursor: grab;
+        }
+        #threejs-canvas:active {
+            cursor: grabbing;
+        }
+
         /* Progress Bar */
         .progress-bar { transition: width 0.5s ease-out; }
         
@@ -1307,7 +1316,14 @@
             scene.add(gridHelper);
             
             // Load GLB model
-            const loader = new THREE.GLTFLoader();
+            // Check if GLTFLoader is available
+            const GLTFLoaderClass = THREE.GLTFLoader || window.GLTFLoader;
+            if (!GLTFLoaderClass) {
+                console.error('GLTFLoader not found! Make sure the script is loaded.');
+                document.getElementById('loadingIndicator').innerHTML = '<div class="text-center"><div class="text-4xl mb-2">❌</div><p class="text-red-600">Error: GLTFLoader not loaded</p></div>';
+                return;
+            }
+            const loader = new GLTFLoaderClass();
             const modelUrl = 'https://magikid-os.s3.us-west-1.amazonaws.com/prod/shares/firstaidkit-v1/firstaidkit-v1.glb';
             
             loader.load(
@@ -1349,31 +1365,40 @@
                 }
             );
             
-            // Mouse/Touch controls
+            // Pointer events for drag rotation (works for both mouse and touch)
             let isDragging = false;
-            let previousMousePosition = { x: 0, y: 0 };
+            let previousPointerPosition = { x: 0, y: 0 };
             
-            canvas.addEventListener('mousedown', function(e) {
+            canvas.addEventListener('pointerdown', function(e) {
                 isDragging = true;
-                previousMousePosition = { x: e.clientX, y: e.clientY };
+                previousPointerPosition = { x: e.clientX, y: e.clientY };
+                canvas.setPointerCapture(e.pointerId);
             });
             
-            canvas.addEventListener('mousemove', function(e) {
+            canvas.addEventListener('pointermove', function(e) {
                 if (!isDragging || !model) return;
                 
-                const deltaX = e.clientX - previousMousePosition.x;
-                const deltaY = e.clientY - previousMousePosition.y;
+                const deltaX = e.clientX - previousPointerPosition.x;
+                const deltaY = e.clientY - previousPointerPosition.y;
                 
                 controls_rotY += deltaX * 0.01;
                 controls_rotX += deltaY * 0.01;
                 
+                // Clamp X rotation to avoid flipping
+                controls_rotX = Math.max(-Math.PI/2, Math.min(Math.PI/2, controls_rotX));
+                
                 model.rotation.y = controls_rotY;
                 model.rotation.x = controls_rotX;
                 
-                previousMousePosition = { x: e.clientX, y: e.clientY };
+                previousPointerPosition = { x: e.clientX, y: e.clientY };
             });
             
-            canvas.addEventListener('mouseup', function() {
+            canvas.addEventListener('pointerup', function(e) {
+                isDragging = false;
+                canvas.releasePointerCapture(e.pointerId);
+            });
+            
+            canvas.addEventListener('pointercancel', function(e) {
                 isDragging = false;
             });
             
@@ -1385,32 +1410,7 @@
                 camera.lookAt(0, 0, 0);
             }, { passive: false });
             
-            // Touch events for iPad
-            canvas.addEventListener('touchstart', function(e) {
-                if (e.touches.length === 1) {
-                    isDragging = true;
-                    previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-                }
-            }, { passive: true });
-            
-            canvas.addEventListener('touchmove', function(e) {
-                if (!isDragging || !model || e.touches.length !== 1) return;
-                
-                const deltaX = e.touches[0].clientX - previousMousePosition.x;
-                const deltaY = e.touches[0].clientY - previousMousePosition.y;
-                
-                controls_rotY += deltaX * 0.01;
-                controls_rotX += deltaY * 0.01;
-                
-                model.rotation.y = controls_rotY;
-                model.rotation.x = controls_rotX;
-                
-                previousMousePosition = { x: e.touches[0].clientX, y: e.touches[0].clientY };
-            }, { passive: true });
-            
-            canvas.addEventListener('touchend', function() {
-                isDragging = false;
-            });
+            // Touch events handled by pointer events above
             
             // Animation loop
             function animate() {
