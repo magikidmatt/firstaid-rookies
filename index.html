@@ -194,7 +194,7 @@
             </button>
         </section>
 
-        <!-- Step 2: Meet Byte -->
+        <!-- Step 2: 3D First Aid Kit Viewer -->
         <section id="step2" class="min-h-screen px-6 py-12 flex flex-col items-center bg-blue-50/50">
             <div class="relative flex flex-col items-center">
                 <div class="step-connector h-16"></div>
@@ -202,35 +202,37 @@
                     2
                 </div>
             </div>
-            <h2 class="font-heading text-3xl font-bold text-rescue-blue mt-6 mb-4">👁️ Meet Byte!</h2>
+            <h2 class="font-heading text-3xl font-bold text-rescue-blue mt-6 mb-4">Let's look at a first-aid kit 3D model!</h2>
             
-            <!-- Interactive Character -->
-            <div class="bg-white rounded-3xl p-8 shadow-xl max-w-md w-full text-center border-4 border-rescue-blue">
-                <svg id="byteRobot" viewBox="0 0 200 200" class="w-48 h-48 mx-auto cursor-pointer" onclick="animateCharacter()">
-                    <!-- Robot Body -->
-                    <rect x="60" y="80" width="80" height="90" rx="15" fill="#4299E1"/>
-                    <rect x="70" y="90" width="60" height="30" rx="5" fill="#2D3748"/>
-                    <!-- Screen Face -->
-                    <rect x="75" y="95" width="50" height="20" rx="3" fill="#48BB78"/>
-                    <text x="100" y="110" text-anchor="middle" fill="white" font-size="12" id="faceText">^_^</text>
-                    <!-- Antenna -->
-                    <line x1="100" y1="80" x2="100" y2="55" stroke="#2D3748" stroke-width="4"/>
-                    <circle cx="100" cy="50" r="10" fill="#E53E3E"/>
-                    <!-- Eyes -->
-                    <circle cx="80" cy="135" r="12" fill="white"/>
-                    <circle cx="120" cy="135" r="12" fill="white"/>
-                    <circle cx="83" cy="135" r="6" fill="#2D3748"/>
-                    <circle cx="123" cy="135" r="6" fill="#2D3748"/>
-                    <!-- Mouth -->
-                    <path id="robotMouth" d="M 85 155 Q 100 165 115 155" stroke="#2D3748" stroke-width="4" fill="none"/>
-                    <!-- Arms -->
-                    <rect x="35" y="95" width="25" height="12" rx="6" fill="#3182CE"/>
-                    <rect x="140" y="95" width="25" height="12" rx="6" fill="#3182CE"/>
-                    <!-- Legs -->
-                    <rect x="75" y="170" width="20" height="25" rx="5" fill="#2B6CB0"/>
-                    <rect x="105" y="170" width="20" height="25" rx="5" fill="#2B6CB0"/>
-                </svg>
-                <p class="text-gray-500 mt-4">Tap Byte to make them dance!</p>
+            <!-- 3D Viewer -->
+            <div class="bg-white rounded-3xl p-6 shadow-xl max-w-lg w-full border-4 border-rescue-blue">
+                <div class="relative" style="min-height: 400px;">
+                    <canvas id="threejs-canvas" class="w-full rounded-xl" style="min-height: 400px; background: linear-gradient(to bottom, #e0f2fe, #bae6fd);"></canvas>
+                    <div id="loadingIndicator" class="absolute inset-0 flex items-center justify-center bg-white/80 rounded-xl">
+                        <div class="text-center">
+                            <div class="text-4xl mb-2">⏳</div>
+                            <p class="text-gray-600">Loading 3D model...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-4 flex flex-wrap gap-2 justify-center">
+                    <button onclick="rotateModel('left')" class="touch-bounce bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-4 py-2 rounded-lg transition">
+                        ↺ Rotate Left
+                    </button>
+                    <button onclick="rotateModel('right')" class="touch-bounce bg-blue-100 hover:bg-blue-200 text-blue-700 font-bold px-4 py-2 rounded-lg transition">
+                        ↻ Rotate Right
+                    </button>
+                    <button onclick="zoomModel('in')" class="touch-bounce bg-green-100 hover:bg-green-200 text-green-700 font-bold px-4 py-2 rounded-lg transition">
+                        + Zoom In
+                    </button>
+                    <button onclick="zoomModel('out')" class="touch-bounce bg-green-100 hover:bg-green-200 text-green-700 font-bold px-4 py-2 rounded-lg transition">
+                        − Zoom Out
+                    </button>
+                    <button onclick="resetModel()" class="touch-bounce bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold px-4 py-2 rounded-lg transition">
+                        ↺ Reset
+                    </button>
+                </div>
+                <p class="text-center text-gray-500 text-sm mt-3">Drag to rotate • Scroll to zoom</p>
             </div>
 
             <!-- Fun Facts -->
@@ -265,9 +267,10 @@
             </div>
 
             <button onclick="completeStep(2)" class="mt-8 touch-bounce bg-rescue-green hover:bg-green-600 text-white font-heading font-bold text-xl px-10 py-5 rounded-full shadow-xl transition-all">
-                I Met Byte! 👀
+                I Explored the 3D Kit! 👀
             </button>
         </section>
+
 
         <!-- Step 3: Gear Up -->
         <section id="step3" class="min-h-screen px-6 py-12 flex flex-col items-center">
